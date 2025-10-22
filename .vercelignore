@@ -1,0 +1,10 @@
+*.py
+server.py
+Procfile
+runtime.txt
+requirements.txt
+.git
+__pycache__
+*.pyc
+.venv
+node_modules
