@@ -6,6 +6,7 @@ from tensorflow.keras.models import load_model
 import base64
 from io import BytesIO
 from PIL import Image
+import os
 
 app = Flask(__name__)
 CORS(app)
@@ -14,6 +15,10 @@ CORS(app)
 emotion_model = load_model('fer2013_mini_XCEPTION.102-0.66.hdf5', compile=False)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 emotion_labels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
+
+@app.route('/', methods=['GET'])
+def health():
+    return jsonify({'status': 'MoodSnaps backend is running!'})
 
 @app.route('/detect', methods=['POST'])
 def detect_emotion():
@@ -57,4 +62,5 @@ def detect_emotion():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=False, port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=False, host='0.0.0.0', port=port)

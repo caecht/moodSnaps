@@ -116,6 +116,11 @@
             'Neutral': 'neutral.jpg'
         };
 
+        // Use production backend URL or localhost for development
+        const BACKEND_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000'
+            : 'https://moodsnaps-backend.onrender.com';
+
         let webcamStream = null;
         let animationId = null;
         let lastEmotion = null;
@@ -225,7 +230,7 @@
                     reader.readAsDataURL(blob);
                     reader.onloadend = async () => {
                         try {
-                            const response = await fetch('http://localhost:5000/detect', {
+                            const response = await fetch(`${BACKEND_URL}/detect`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ image: reader.result })
@@ -235,7 +240,7 @@
                                 updateEmotion(result.emotion);
                             }
                         } catch (error) {
-                            console.log('Server not running - ensure server.py is running');
+                            console.log('Backend unavailable - ensure server is running');
                         }
                     };
                 });
