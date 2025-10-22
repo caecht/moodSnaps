@@ -183,29 +183,43 @@
         function captureAndDownload() {
             const video = document.getElementById('webcam');
             
+            // Flash screen
+            const flashOverlay = document.getElementById('flashOverlay');
+            flashOverlay.style.display = 'block';
+            setTimeout(() => {
+                flashOverlay.style.display = 'none';
+            }, 200);
+            
             // Play camera shutter sound
             playShutterSound();
             
-            // Create canvas with higher resolution (2x the video size)
+            // Create canvas with frame (no stretching)
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            // Set canvas size to 2x video resolution for better quality
-            canvas.width = video.videoWidth * 2;
-            canvas.height = video.videoHeight * 2;
+            const frameWidth = 30;
+            const photoWidth = video.videoWidth * 2;
+            const photoHeight = video.videoHeight * 2;
             
-            // Scale the drawing to match canvas size
-            ctx.scale(2, 2);
-            ctx.drawImage(video, 0, 0);
+            // Total canvas size includes frame
+            canvas.width = photoWidth + (frameWidth * 2);
+            canvas.height = photoHeight + (frameWidth * 2);
             
-            // Show captured message
+            // Draw brown frame background
+            ctx.fillStyle = '#8B7355';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw photo in the middle (without scaling - 1:1)
+            ctx.drawImage(video, frameWidth, frameWidth, photoWidth, photoHeight);
+            
+            // Show message
             const timerDisplay = document.getElementById('timerDisplay');
             timerDisplay.textContent = 'Photo saved!';
             setTimeout(() => {
                 timerDisplay.textContent = '';
             }, 2000);
             
-            // Download the high-res photo
+            // Download
             canvas.toBlob((blob) => {
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
@@ -213,7 +227,7 @@
                 link.download = `moodSnaps_${new Date().getTime()}.jpg`;
                 link.click();
                 URL.revokeObjectURL(url);
-            }, 'image/jpeg', 0.95); // High quality JPEG
+            }, 'image/jpeg', 0.95);
         }
 
         function playShutterSound() {

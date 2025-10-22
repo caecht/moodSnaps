@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>moodSnap!</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'poppins', sans-serif;
+            background-image: url('assets/bg.png');
+            background-attachment: fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        .left-section {
+            justify-content: center;
+            align-items: center;
+        }
+
+        .strips-image {
+            max-width: 450px;
+            width: 100%;
+            height: auto;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.3));
+        }
+
+        .right-section {
+            flex: 0.7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            row-gap: 30px;
+        }
+
+        .header {
+            text-align: center;
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 4.5em;
+            font-weight: 700;
+            color: #000;
+            margin-bottom: 10px;
+            letter-spacing: -2px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 35px 40px;
+            border-radius: 30px;
+            max-width: 550px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .info-box p {
+            font-size: 1.1em;
+            line-height: 1.7;
+            color: #000;
+        }
+
+        .start-button {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 1.2em;
+            font-weight: 550;
+            font-family: 'poppins', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 550px;
+        }
+
+        .start-button:hover {
+            background: #16213e;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .emoji-decoration {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 2em;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            max-width: 550px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #1a1a2e;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Camera View */
+        .camera-view {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #a8d8ea 0%, #7ba3c0 50%, #4a6b82 100%);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .camera-view.active {
+            display: flex;
+        }
+
+        #video {
+            max-width: 640px;
+            width: 90%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        #countdown {
+            position: absolute;
+            font-size: 150px;
+            color: #4ade80;
+            font-weight: bold;
+            text-shadow: 3px 3px 20px rgba(0,0,0,0.8);
+            display: none;
+        }
+
+        #cameraStatus {
+            color: #1a1a2e;
+            font-size: 1.5em;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .photo-preview {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .preview-slot {
+            width: 100px;
+            height: 130px;
+            background: rgba(255,255,255,0.1);
+            border: 2px dashed rgba(255,255,255,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .preview-slot.filled {
+            border: 2px solid #4ade80;
+        }
+
+        .preview-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #finalFrame {
+            max-width: 280px;
+            max-height: 80vh;
+            width: 90%;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+
+        .results-container {
+            display: none;
+            align-items: center;
+            gap: 60px;
+            max-width: 1200px;
+        }
+
+        .results-container.active {
+            display: flex;
+        }
+
+        .results-right {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .results-title {
+            font-size: 3.5em;
+            font-weight: 700;
+            color: #1a1a2e;
+            text-align: left;
+            width: 100%;
+        }
+
+        .results-emoji {
+            font-size: 2em;
+            margin-left: 10px;
+        }
+
+        .compliment-box {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 30px 40px;
+            border-radius: 50px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .compliment-box p {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #1a1a2e;
+            text-align: center;
+            margin: 0;
+        }
+
+        .results-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .results-buttons button {
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            font-family: 'poppins', sans-serif;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+        }
+
+        .results-buttons button:hover {
+            background: #16213e;
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .flash.active {
+            animation: flashAnimation 0.3s;
+        }
+
+        @keyframes flashAnimation {
+            0% { opacity: 0; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 3.5em;
+            }
+
+            .results-container {
+                flex-direction: column;
+                gap: 30px;
+            }
+
+            .results-title {
+                text-align: center;
+                font-size: 2.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <div class="flash" id="flash"></div>
+    
+    <div class="container" id="landingPage">
+        <div class="left-section">
+            <img src="assets/strips.png" alt="Photo strips" class="strips-image">
+        </div>
+        
+        <div class="right-section">
+            <div class="header">
+                <h1>moodSnap!</h1>
+                <p class="subtitle">by caecht</p>
+            </div>
+            
+            <div class="info-box">
+                <p>moodSnaps is an AI photobooth that vibes with your emotions! It automatically detects your mood and transforms the entire atmosphere to match your feelings as you snap your photos.</p>
+            </div>
+            
+            <button class="start-button" onclick="startPhotobooth()">Start Photobooth</button>
+            
+            <div class="emoji-decoration">
+                <span>😊</span>
+                <span>😢</span>
+                <span>😡</span>
+                <span>😴</span>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="camera-view" id="cameraView">
+        <video id="video" autoplay playsinline></video>
+        <div id="countdown"></div>
+        <div id="cameraStatus">Get ready for photo 1 of 3!</div>
+        
+        <div class="photo-preview">
+            <div class="preview-slot" id="preview1"></div>
+            <div class="preview-slot" id="preview2"></div>
+            <div class="preview-slot" id="preview3"></div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <img id="finalFrame" alt="Final Frame">
+            
+            <div class="results-right">
+                <div class="results-title">
+                    moodSnaps!<span class="results-emoji">✨☆✨☆☆☆</span>
+                </div>
+                
+                <div class="compliment-box">
+                    <p>U look great <3</p>
+                </div>
+                
+                <div class="results-buttons">
+                    <button onclick="downloadFrame()">Download photostrip</button>
+                    <button onclick="resetPhotobooth()">Take Another</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        let video = document.getElementById('video');
+        let canvas = document.getElementById('canvas');
+        let ctx = canvas.getContext('2d');
+        let photos = [];
+        let photoCount = 0;
+        let stream = null;
+
+        async function startPhotobooth() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                video.srcObject = stream;
+                
+                document.getElementById('landingPage').style.display = 'none';
+                document.getElementById('cameraView').classList.add('active');
+                
+                updateProgress(0);
+                
+                setTimeout(() => {
+                    startCountdown();
+                }, 2000);
+            } catch (err) {
+                alert('Error: Could not access camera. Please allow camera permissions.');
+                console.error(err);
+            }
+        }
+
+        function startCountdown() {
+            let countdownEl = document.getElementById('countdown');
+            let count = 3;
+            
+            countdownEl.style.display = 'block';
+            countdownEl.textContent = count;
+            
+            let interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownEl.textContent = count;
+                } else {
+                    clearInterval(interval);
+                    countdownEl.style.display = 'none';
+                    capturePhoto();
+                }
+            }, 1000);
+        }
+
+        function capturePhoto() {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            let photoData = canvas.toDataURL('image/jpeg');
+            photos.push(photoData);
+            photoCount++;
+            
+            // Flash effect
+            document.getElementById('flash').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('flash').classList.remove('active');
+            }, 300);
+            
+            // Update preview
+            let preview = document.getElementById(`preview${photoCount}`);
+            preview.innerHTML = `<img src="${photoData}" alt="Photo ${photoCount}">`;
+            preview.classList.add('filled');
+            
+            // Update progress
+            updateProgress((photoCount / 3) * 100);
+            
+            if (photoCount < 3) {
+                document.getElementById('cameraStatus').textContent = `Photo ${photoCount} captured! Get ready for photo ${photoCount + 1}...`;
+                setTimeout(() => {
+                    startCountdown();
+                }, 2000);
+            } else {
+                document.getElementById('cameraStatus').textContent = 'All photos captured! Creating your frame...';
+                setTimeout(() => {
+                    createFrame();
+                }, 1000);
+            }
+        }
+
+        function updateProgress(percent) {
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function createFrame() {
+            const frameCanvas = document.createElement('canvas');
+            const fctx = frameCanvas.getContext('2d');
+            
+            const photoWidth = 300;
+            const photoHeight = 200;
+            const border = 30;
+            const headerHeight = 80;
+            const footerHeight = 50;
+            
+            frameCanvas.width = photoWidth + (border * 2);
+            frameCanvas.height = (photoHeight * 3) + (border * 4) + headerHeight + footerHeight;
+            
+            // Black background
+            fctx.fillStyle = '#000000';
+            fctx.fillRect(0, 0, frameCanvas.width, frameCanvas.height);
+            
+            // Header with stars
+            fctx.fillStyle = '#ffffff';
+            fctx.font = 'bold 20px poppins, sans-serif';
+            fctx.textAlign = 'center';
+            fctx.fillText('✨✨', frameCanvas.width / 2, 40);
+            
+            // Load and draw photos
+            let loadedCount = 0;
+            photos.forEach((photoData, index) => {
+                let img = new Image();
+                img.onload = () => {
+                    const y = headerHeight + border + (index * (photoHeight + border));
+                    fctx.drawImage(img, border, y, photoWidth, photoHeight);
+                    
+                    loadedCount++;
+                    if (loadedCount === 3) {
+                        // Footer with date and stars
+                        const now = new Date();
+                        const dateStr = `${String(now.getMonth() + 1).padStart(2, '0')}/${String(now.getDate()).padStart(2, '0')}/${String(now.getFullYear()).slice(2)}`;
+                        
+                        fctx.fillStyle = '#ffffff';
+                        fctx.font = '16px poppins, sans-serif';
+                        fctx.textAlign = 'center';
+                        fctx.fillText('✨✨', frameCanvas.width / 2, frameCanvas.height - 30);
+                        fctx.fillText(dateStr, frameCanvas.width / 2, frameCanvas.height - 10);
+                        
+                        // Display final frame
+                        document.getElementById('finalFrame').src = frameCanvas.toDataURL('image/jpeg');
+                        document.getElementById('resultsContainer').classList.add('active');
+                        document.getElementById('cameraStatus').style.display = 'none';
+                        
+                        // Hide preview and video
+                        document.querySelector('.photo-preview').style.display = 'none';
+                        video.style.display = 'none';
+                        
+                        // Stop camera
+                        if (stream) {
+                            stream.getTracks().forEach(track => track.stop());
+                        }
+                    }
+                };
+                img.src = photoData;
+            });
+        }
+
+        function downloadFrame() {
+            const link = document.createElement('a');
+            link.download = `moodsnap_${Date.now()}.jpg`;
+            link.href = document.getElementById('finalFrame').src;
+            link.click();
+        }
+
+        function resetPhotobooth() {
+            photos = [];
+            photoCount = 0;
+            
+            document.getElementById('preview1').innerHTML = '';
+            document.getElementById('preview2').innerHTML = '';
+            document.getElementById('preview3').innerHTML = '';
+            document.getElementById('preview1').classList.remove('filled');
+            document.getElementById('preview2').classList.remove('filled');
+            document.getElementById('preview3').classList.remove('filled');
+            
+            document.getElementById('resultsContainer').classList.remove('active');
+            document.getElementById('cameraStatus').style.display = 'block';
+            document.querySelector('.photo-preview').style.display = 'flex';
+            video.style.display = 'block';
+            
+            document.getElementById('cameraView').classList.remove('active');
+            document.getElementById('landingPage').style.display = 'flex';
+            
+            updateProgress(0);
+        }
+    </script>
+</body>
+</html>
