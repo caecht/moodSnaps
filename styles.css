@@ -1,0 +1,244 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    transition: background 0.5s ease;
+}
+
+body.emotion-angry {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+}
+
+body.emotion-disgust {
+    background: linear-gradient(135deg, #9c8e00 0%, #b8a700 100%);
+}
+
+body.emotion-fear {
+    background: linear-gradient(135deg, #6200ea 0%, #7c4dff 100%);
+}
+
+body.emotion-happy {
+    background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+}
+
+body.emotion-sad {
+    background: linear-gradient(135deg, #4d7fcc 0%, #5a9fd4 100%);
+}
+
+body.emotion-surprise {
+    background: linear-gradient(135deg, #ff9500 0%, #ffb300 100%);
+}
+
+body.emotion-neutral {
+    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+}
+
+.container {
+    max-width: 1200px;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    padding: 40px;
+    backdrop-filter: blur(10px);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+    font-size: 1.1em;
+}
+
+.content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.video-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+video {
+    width: 100%;
+    max-width: 400px;
+    height: 300px;
+    border-radius: 15px;
+    background: #000;
+    border: 8px solid #667eea;
+    object-fit: cover;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+.btn {
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff5252 100%);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.stats-section {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.emotion-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.emotion-card h3 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.emotion-display {
+    font-size: 2em;
+    font-weight: bold;
+    color: #667eea;
+    margin-bottom: 10px;
+}
+
+.duration-text {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.confidence-bar {
+    width: 100%;
+    height: 25px;
+    background: #ddd;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.confidence-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+#confidenceText {
+    color: #667eea;
+    font-weight: bold;
+    text-align: center;
+}
+
+.photo-container {
+    text-align: center;
+}
+
+.photo-container img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-height: 200px;
+}
+
+.info {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    border-left: 5px solid #667eea;
+}
+
+.info h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.info ul {
+    list-style: none;
+    color: #666;
+}
+
+.info li {
+    padding: 8px 0;
+    padding-left: 25px;
+    position: relative;
+}
+
+.info li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #667eea;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    .content {
+        grid-template-columns: 1fr;
+    }
+
+    video {
+        max-width: 100%;
+    }
+}

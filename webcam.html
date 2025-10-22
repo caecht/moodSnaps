@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            text-align: center;
+            background: #f0f0f0;
+            padding: 20px;
+            transition: background-color 1s ease;
+        }
+        
+        body.emotion-angry { background: #ff6b6b; }
+        body.emotion-disgust { background: #9c8e00; }
+        body.emotion-fear { background: #6200ea; }
+        body.emotion-happy { background: #ffd700; }
+        body.emotion-sad { background: #4d7fcc; }
+        body.emotion-surprise { background: #ff9500; }
+        body.emotion-neutral { background: #95a5a6; }
+        
+        h1 { color: #333; }
+        
+        video {
+            width: 100%;
+            max-width: 500px;
+            border: 8px solid #333;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+        
+        video::-moz-media-controls {
+            display: none !important;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #667eea;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button:hover:not(:disabled) {
+            background: #5568d3;
+        }
+        
+        .stats {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        
+        .emotion { font-size: 2em; font-weight: bold; color: #667eea; }
+        .duration { font-size: 1.2em; color: #666; }
+        
+        .photo-container {
+            margin: 20px 0;
+        }
+        
+        .photo-container img {
+            max-width: 300px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎭 Emotion Detection</h1>
+    
+    <video id="webcam" autoplay disablePictureInPicture></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+    
+    <div>
+        <button id="startBtn" onclick="startWebcam()">Start</button>
+        <button id="stopBtn" onclick="stopWebcam()" disabled>Stop</button>
+        <button id="captureBtn" onclick="capturePhoto()" disabled>Capture Photo</button>
+    </div>
+    
+    <div class="stats">
+        <div class="emotion" id="emotion">Waiting...</div>
+        <div class="duration" id="duration">Duration: 0.0s</div>
+        <div id="timerDisplay" style="font-size: 2em; color: #ff6b6b; margin-top: 20px; font-weight: bold; min-height: 40px;"></div>
+    </div>
+
+    <script>
+        const emotionLabels = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral'];
+        const emotionClasses = {
+            'Angry': 'emotion-angry',
+            'Disgust': 'emotion-disgust',
+            'Fear': 'emotion-fear',
+            'Happy': 'emotion-happy',
+            'Sad': 'emotion-sad',
+            'Surprise': 'emotion-surprise',
+            'Neutral': 'emotion-neutral'
+        };
+        const emotionPhotos = {
+            'Angry': 'angry.jpg',
+            'Happy': 'happy.jpg',
+            'Neutral': 'neutral.jpg'
+        };
+
+        let webcamStream = null;
+        let animationId = null;
+        let lastEmotion = null;
+        let emotionStartTime = null;
+        let lastDetectionTime = 0;
+        const DETECTION_INTERVAL = 2000; // Check emotion every 2 seconds
+
+        async function startWebcam() {
+            try {
+                webcamStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                document.getElementById('webcam').srcObject = webcamStream;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('stopBtn').disabled = false;
+                document.getElementById('captureBtn').disabled = false;
+                detectEmotion();
+            } catch (error) {
+                alert('Could not access webcam');
+            }
+        }
+
+        function stopWebcam() {
+            if (webcamStream) {
+                webcamStream.getTracks().forEach(track => track.stop());
+            }
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('captureBtn').disabled = true;
+            document.getElementById('emotion').textContent = 'Waiting...';
+            document.getElementById('duration').textContent = 'Duration: 0.0s';
+            document.body.className = '';
+        }
+
+        function capturePhoto() {
+            document.getElementById('captureBtn').disabled = true;
+            
+            // Start 3 second countdown before capturing
+            const timerDisplay = document.getElementById('timerDisplay');
+            let count = 3;
+            timerDisplay.textContent = `Capturing in ${count}s`;
+            
+            const interval = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    timerDisplay.textContent = `Capturing in ${count}s`;
+                } else {
+                    clearInterval(interval);
+                    // Now capture the photo
+                    captureAndDownload();
+                    document.getElementById('captureBtn').disabled = false;
+                }
+            }, 1000);
+        }
+
+        function captureAndDownload() {
+            const video = document.getElementById('webcam');
+            
+            // Create canvas with higher resolution (2x the video size)
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to 2x video resolution for better quality
+            canvas.width = video.videoWidth * 2;
+            canvas.height = video.videoHeight * 2;
+            
+            // Scale the drawing to match canvas size
+            ctx.scale(2, 2);
+            ctx.drawImage(video, 0, 0);
+            
+            // Show captured message
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerDisplay.textContent = 'Photo saved!';
+            setTimeout(() => {
+                timerDisplay.textContent = '';
+            }, 2000);
+            
+            // Download the high-res photo
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `emotion_${new Date().getTime()}.jpg`;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/jpeg', 0.95); // High quality JPEG
+        }
+
+        function detectEmotion() {
+            if (!webcamStream) return;
+            
+            const currentTime = Date.now();
+            if (currentTime - lastDetectionTime >= DETECTION_INTERVAL) {
+                // Get frame from video and send to backend
+                const canvas = document.getElementById('canvas');
+                const ctx = canvas.getContext('2d');
+                const video = document.getElementById('webcam');
+                
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.drawImage(video, 0, 0);
+                
+                // Send to server for emotion detection
+                canvas.toBlob(async (blob) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(blob);
+                    reader.onloadend = async () => {
+                        try {
+                            const response = await fetch('http://localhost:5000/detect', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ image: reader.result })
+                            });
+                            const result = await response.json();
+                            if (result.emotion) {
+                                updateEmotion(result.emotion);
+                            }
+                        } catch (error) {
+                            console.log('Server not running - ensure server.py is running');
+                        }
+                    };
+                });
+                
+                lastDetectionTime = currentTime;
+            }
+            
+            animationId = requestAnimationFrame(detectEmotion);
+        }
+
+        function updateEmotion(emotion) {
+            if (emotion !== lastEmotion) {
+                lastEmotion = emotion;
+                emotionStartTime = Date.now();
+                document.getElementById('photoContainer').style.display = 'none';
+            } else {
+                const duration = (Date.now() - emotionStartTime) / 1000;
+                document.getElementById('emotion').textContent = emotion;
+                document.getElementById('duration').textContent = `Duration: ${duration.toFixed(1)}s`;
+                
+                // Change background at 1.2 seconds
+                if (duration > 1.2) {
+                    document.body.className = emotionClasses[emotion] || '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
