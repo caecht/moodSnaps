@@ -86,6 +86,9 @@
     
     <video id="webcam" autoplay disablePictureInPicture></video>
     <canvas id="canvas" style="display:none;"></canvas>
+    <audio id="shutterSound" preload="auto">
+        <source src="shutter.wav" type="audio/mpeg">
+    </audio>
     
     <div>
         <button id="startBtn" onclick="startWebcam()">Start</button>
@@ -175,6 +178,9 @@
         function captureAndDownload() {
             const video = document.getElementById('webcam');
             
+            // Play camera shutter sound
+            playShutterSound();
+            
             // Create canvas with higher resolution (2x the video size)
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -199,10 +205,16 @@
                 const url = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = url;
-                link.download = `emotion_${new Date().getTime()}.jpg`;
+                link.download = `moodSnaps_${new Date().getTime()}.jpg`;
                 link.click();
                 URL.revokeObjectURL(url);
             }, 'image/jpeg', 0.95); // High quality JPEG
+        }
+
+        function playShutterSound() {
+            const audio = document.getElementById('shutterSound');
+            audio.currentTime = 0;
+            audio.play();
         }
 
         function detectEmotion() {
